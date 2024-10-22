@@ -19,7 +19,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 @Config
 @Autonomous(name = "BLUE_TEST_AUTO_PIXEL", group = "Autonomous")
 public class testAuto extends LinearOpMode {
-
+/*
     public class ArmActions {
         CRServo sub_extender;
         public ArmActions(HardwareMap hardwareMap) {
@@ -59,21 +59,27 @@ public class testAuto extends LinearOpMode {
             return new ExtendSubArm();
         }
     }
-
+*/
 
     @Override
     public void runOpMode() {
 
-        ArmActions  Arm = new ArmActions(hardwareMap);
+        //ArmActions  Arm = new ArmActions(hardwareMap);
 
-        Pose2d initialPose = new Pose2d(37, 58, 0);
-        MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
+        Pose2d startPose = new Pose2d(37, 58, 0);
+        MecanumDrive drive = new MecanumDrive(hardwareMap, startPose);
 
-
-        TrajectoryActionBuilder tab1 = drive.actionBuilder(initialPose)
-                .lineToX(56)
-                .lineToX(initialPose.position.x)
-                .strafeTo(new Vector2d(initialPose.position.x, 25));
+        Pose2d bucketPose = new Pose2d(56, startPose.position.y, 180);
+        TrajectoryActionBuilder tab1 = drive.actionBuilder(startPose)
+                .strafeToLinearHeading(bucketPose.position, bucketPose.heading)
+                .strafeToLinearHeading(startPose.position, startPose.heading)
+                .strafeTo(new Vector2d(startPose.position.x, 25))
+                .strafeTo(new Vector2d(56, 58))
+                //second sample
+                .strafeTo(new Vector2d(50, 25))
+                .strafeTo(bucketPose.position)
+                .strafeTo(new Vector2d(60, 25))
+                .strafeTo(bucketPose.position);
 
 
         while (!isStopRequested() && !opModeIsActive()) {

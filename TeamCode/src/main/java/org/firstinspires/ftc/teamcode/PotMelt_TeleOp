@@ -1,0 +1,165 @@
+package org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.internal.system.Deadline;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
+import java.util.concurrent.TimeUnit;
+
+@TeleOp
+public class PotMelt_TeleOp extends LinearOpMode {
+
+     
+        private ElapsedTime runtime = new ElapsedTime();
+        private DcMotor leftFront = null;
+        private DcMotor leftRear = null;
+        private DcMotor rightFront = null;
+        private DcMotor rightRear = null;  
+        private CRServo intake = null;
+        private CRServo sub_extender = null;
+        private DcMotor leftSlide = null;
+        private DcMotor rightSlide = null;
+        private Servo flip = null;
+      
+
+    /*
+     * Rate limit gamepad button presses to every 500ms.
+     */
+    private final static int GAMEPAD_LOCKOUT = 500;
+    
+    Telemetry.Item patternName;
+    Telemetry.Item display;
+    Deadline ledCycleDeadline;
+    Deadline gamepadRateLimit;
+    
+    protected enum DisplayKind {
+        MANUAL,
+        AUTO
+    }
+
+    @Override
+    public void runOpMode() {
+        telemetry.addData("Status", "Initialized");
+        telemetry.update();  
+        
+        leftFront = hardwareMap.get(DcMotor.class, "leftFront");
+        leftRear = hardwareMap.get(DcMotor.class, "leftRear");
+        rightFront = hardwareMap.get(DcMotor.class, "rightFront");
+        rightRear = hardwareMap.get(DcMotor.class, "rightRear");
+        intake = hardwareMap.get(CRServo.class, "intake");
+        sub_extender = hardwareMap.get(CRServo.class, "sub_extender");
+        flip = hardwareMap.get(Servo.class, "flip");
+        leftSlide = hardwareMap.get(DcMotor.class, "leftSlide");
+        rightSlide = hardwareMap.get(DcMotor.class, "rightSlide");
+        
+        //launch = hardwareMap.get(Servo.class, "launch");
+
+        // Reverse the right side motors
+        // Reverse left motors if you are using NeveRests
+        leftRear.setDirection(DcMotorSimple.Direction.REVERSE);
+        leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
+        
+        leftFront.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
+        leftRear.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
+        rightFront.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
+        rightRear.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
+        leftSlide.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
+        rightSlide.setZeroPowerBehavior(ZeroPowerBehavior.BRAKE);
+        
+        leftSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        
+        waitForStart();
+
+        while (opModeIsActive()) {
+            
+            double y = -gamepad1.left_stick_y; // Remember, this is reversed!
+            double rt = gamepad1.right_trigger; // Counteract imperfect strafing
+            double lt = gamepad1.left_trigger;
+            double rx = gamepad1.right_stick_x;
+
+            // Denominator is the largest motor power (absolute value) or 1
+            // This ensures all the powers maintain the same ratio, but only when
+            // at least one is out of the range [-1, 1]
+
+        double denominator = Math.max(Math.abs(y) + Math.abs(rt) + Math.abs(lt) + Math.abs(rx), 1.5);
+        double leftFrontpower = (y + rt - lt + rx) / denominator; 
+        double leftRearpower = (y - rt + lt + rx) / denominator; 
+        double rightFrontpower = (y - rt + lt - rx) / denominator;
+        double rightRearpower = (y + rt - lt - rx) / denominator; 
+        
+        leftFront.setPower(leftFrontpower);
+        leftRear.setPower(leftRearpower);
+        rightFront.setPower(rightFrontpower);
+        rightRear.setPower(rightRearpower);
+        
+        leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    
+        telemetry.addData("Status", "Run Time: " + runtime.toString());
+        telemetry.update();
+ 
+     
+     
+//gamepad 1
+
+      if (gamepad1.y) {
+            intake.setPower(-0.5); 
+        }  else if (gamepad1.a){
+            intake.setPower(0.5);
+        }  else {
+            intake.setPower(0);
+        } 
+        
+        if (gamepad1.dpad_left) {
+            sub_extender.setPower(0.6);
+        } else if (gamepad1.dpad_right) {
+            sub_extender.setPower(-0.6);
+        } else {
+            sub_extender.setPower(0);
+        }
+                  
+        if (gamepad1.left_bumper) {
+            leftSlide.setPower(-0.5);
+            rightSlide.setPower(-0.5);
+         }   else if (gamepad1.right_bumper) {
+            leftSlide.setPower(0.5);
+            rightSlide.setPower(0.5);
+         }  else {
+            leftSlide.setPower(0);
+            rightSlide.setPower(0);
+         }
+         
+         if (gamepad1.x) {
+             flip.setPosition(0.5);
+         } else if (gamepad1.b) {
+             flip.setPosition(0);
+         }
+
+        //gamepad 2
+
+     /*   if (gamepad2.dpad_up){
+            LClaw.setPosition(1);
+            RClaw.setPosition(0);
+        }
+        
+        if (gamepad2.dpad_down){
+            LClaw.setPosition(0);
+            RClaw.setPosition(1);
+        }   */
+    }
+ }
+}

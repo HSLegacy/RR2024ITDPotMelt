@@ -8,54 +8,18 @@ import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import org.firstinspires.ftc.teamcode.auto.actions.ArmActions;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 
 @Config
 @Autonomous(name = "BLUE_TEST_AUTO_PIXEL", group = "Autonomous")
 public class Net_Auto extends LinearOpMode {
-/*
-    public class ArmActions {
-        CRServo sub_extender;
-        public ArmActions(HardwareMap hardwareMap) {
-            sub_extender = hardwareMap.get(CRServo.class, "sub_extender");
-        }
-        public class ExtendSubArm implements Action {
-            private boolean initialized = false;
+    HardwareMap hardwareMap;
 
-            @Override
-            public boolean run(@NonNull TelemetryPacket packet) {
-                if (!initialized) {
-                    sub_extender.setPower(0.8);
-                    initialized = true;
-                }
-
-                packet.put("hello", "sigma");
-                return false;
-            }
-        }
-        public class RetractSubArm implements Action {
-            private boolean initialized = false;
-            @Override
-            public boolean run(@NonNull TelemetryPacket packet) {
-                if (!initialized) {
-                    sub_extender.setPower(-0.8);
-                    initialized = true;
-                }
-
-                packet.put("hello", "sigma");
-                return false;
-            }
-        }
-        public Action retractSubArm() {
-            return new RetractSubArm();
-        }
-        public Action extendSubArm() {
-            return new ExtendSubArm();
-        }
-    }
-*/
-
+    ArmActions armActions = new ArmActions(hardwareMap);
     @Override
     public void runOpMode() {
 
@@ -96,8 +60,8 @@ public class Net_Auto extends LinearOpMode {
 
         Actions.runBlocking(
                 new SequentialAction(
-                        trajectoryActionChosen
-
+                        trajectoryActionChosen,
+                        armActions.extendArm()
                 )
         );
     }

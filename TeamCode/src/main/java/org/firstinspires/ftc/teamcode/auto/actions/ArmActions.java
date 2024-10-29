@@ -11,15 +11,18 @@ import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 
 public class ArmActions {
     private DcMotorEx motor;
+    private CRServo intake;
 
     public ArmActions(HardwareMap hardwareMap) {
         motor = hardwareMap.get(DcMotorEx.class, "shooterMotor");
+        intake = hardwareMap.get(CRServo.class, "shooterMotor");
     }
 
     public Action extendArm(){
@@ -39,21 +42,18 @@ public class ArmActions {
             }
         };
     };
-    public Action intake(){
+    public Action runIntake(boolean slow){
         return new Action() {
-            private boolean lowPower = false;
 
             @Override
             public boolean run (@NonNull TelemetryPacket packet){
-                if (!lowPower) {
+                if (!slow) {
                     motor.setPower(0.8);
                 }else{
-                    motor.setPower(0.4);
+                    motor.setPower(0.2);
                 }
 
-                double vel = motor.getVelocity();
-                packet.put("shooterVelocity", vel);
-                return vel < 10_000.0;
+                return slow;
             }
         };
     };

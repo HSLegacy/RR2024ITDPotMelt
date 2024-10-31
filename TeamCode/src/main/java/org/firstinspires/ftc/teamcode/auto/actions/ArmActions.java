@@ -42,6 +42,7 @@ public class ArmActions {
             public boolean run (@NonNull TelemetryPacket packet){
             if (!initialized) {
                 leftSlide.setPower(0.8);
+                rightSlide.setPower(0.8);
                 initialized = true;
             }
 
@@ -81,28 +82,43 @@ public class ArmActions {
             }
         };
     };
+
+    public Action deposit() {
+        return new Action() {
+            private boolean initialized;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    bucketPivot.setPosition(1);
+                    while (leftSlide.getCurrentPosition() < 500 && rightSlide.getCurrentPosition() < 500) {
+                        leftSlide.setPower(1);
+                        rightSlide.setPower(1);
+                    }
+                    leftSlide.setPower(0);
+                    rightSlide.setPower(0);
+                    bucketPivot.setPosition(0);
+
+                }
+
+                return initialized;
+            }
+        };
     }
-    public Action runOutake(){
+    public Action depositReset(){
         return new Action() {
             private boolean initialized;
             @Override
             public boolean run (@NonNull TelemetryPacket packet){
                 if (!initialized) {
                     bucketPivot.setPosition(1);
-                    intakePivot.setPosition(1);
-                    intake.setPower(-0.8);
-                    while(leftSlide.getCurrentPosition() < 500){
-                        leftSlide.setPower(1);
+                    while(leftSlide.getCurrentPosition() < 0 && rightSlide.getCurrentPosition() < 0){
+                        leftSlide.setPower(-0.2);
+                        rightSlide.setPower(-0.2);
                     }
                     leftSlide.setPower(0);
-                    bucketPivot.setPosition(0);
-                    while(leftSlide.getCurrentPosition() > 500){
-                        leftSlide.setPower(-0.2);
-                    }
-                    bucketPivot.setPosition(1);
+                    rightSlide.setPower(0);
 
-                }else{
-                    intake.setPower(0.2);
                 }
 
                 return initialized;

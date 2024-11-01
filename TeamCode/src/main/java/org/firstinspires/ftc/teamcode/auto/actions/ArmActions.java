@@ -56,16 +56,32 @@ public class ArmActions {
             boolean initalized = false;
             @Override
             public boolean run (@NonNull TelemetryPacket packet){
-                if (!slow) {
-                    intake.setPower(0.8);
-                }else{
-                    intake.setPower(0.2);
+                if (!initalized) {
+                    intakePivot.setPosition(1);
+                    if (!slow) {
+                        intake.setPower(0.8);
+                    } else {
+                        intake.setPower(0.2);
+                    }
                 }
-                intakePivot.setPosition(10);
                 return initalized;
             }
         };
     };
+    public Action reverseIntake(){
+        return new Action() {
+            boolean initalized = false;
+            @Override
+            public boolean run (@NonNull TelemetryPacket packet){
+                intakePivot.setPosition(0);
+                if (!initalized) {
+                    intake.setPower(-0.2);
+                }
+                return initalized;
+            }
+        };
+    };
+    }
     public Action runOutake(){
         return new Action() {
             private boolean initialized;

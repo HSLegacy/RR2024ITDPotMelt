@@ -32,20 +32,16 @@ public class Net_Auto extends LinearOpMode {
 
         TrajectoryActionBuilder tab1 = drive.actionBuilder(startPose)
                 .strafeTo(new Vector2d(startPose.position.x, startPose.position.y - 10))
-                .stopAndAdd(armActions.runIntake(true))
                 //pre-loaded sample
                 .strafeToLinearHeading(bucketPose.position, bucketPose.heading)
                 //first sample
                 .strafeToLinearHeading(new Vector2d(37, 25), 0)
-                .stopAndAdd(armActions.runIntake(true))
                 .strafeToLinearHeading(bucketPose.position, bucketPose.heading)
                 //second sample
                 .strafeToLinearHeading(new Vector2d(50, 25), 0)
-                .stopAndAdd(armActions.runIntake(true))
                 .strafeToLinearHeading(bucketPose.position, bucketPose.heading)
                 // third sample
                 .strafeToLinearHeading(new Vector2d(60, 25), 0)
-                .stopAndAdd(armActions.runIntake(true))
                 .strafeToLinearHeading(bucketPose.position, bucketPose.heading);
 
 

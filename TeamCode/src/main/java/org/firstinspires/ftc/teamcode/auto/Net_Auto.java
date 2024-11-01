@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.auto;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
@@ -13,6 +14,8 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.MecanumDrive;
+
+import kotlin.jvm.internal.TypeParameterReference;
 
 @Config
 @Autonomous(name = "BLUE_TEST_AUTO_PIXEL", group = "Autonomous")
@@ -30,19 +33,37 @@ public class Net_Auto extends LinearOpMode {
 
         MecanumDrive drive = new MecanumDrive(hardwareMap, startPose);
 
-        TrajectoryActionBuilder tab1 = drive.actionBuilder(startPose)
+        TrajectoryActionBuilder bucket_traj_1 = drive.actionBuilder(startPose)
                 .strafeTo(new Vector2d(startPose.position.x, startPose.position.y - 10))
                 //pre-loaded sample
                 .strafeToLinearHeading(bucketPose.position, bucketPose.heading)
+                .stopAndAdd(new ParallelAction(armActions.deposit()))
+                .waitSeconds(1)
+                .stopAndAdd(new ParallelAction(armActions.depositReset()))
                 //first sample
                 .strafeToLinearHeading(new Vector2d(37, 25), 0)
+                .stopAndAdd(armActions.runIntake(false))
+                .waitSeconds(2)
                 .strafeToLinearHeading(bucketPose.position, bucketPose.heading)
+                .stopAndAdd(armActions.reverseIntake())
+                .stopAndAdd(new ParallelAction(armActions.deposit()))
+                .stopAndAdd(new ParallelAction(armActions.depositReset()))
                 //second sample
                 .strafeToLinearHeading(new Vector2d(50, 25), 0)
+                .stopAndAdd(armActions.runIntake(false))
+                .waitSeconds(2)
                 .strafeToLinearHeading(bucketPose.position, bucketPose.heading)
+                .stopAndAdd(armActions.reverseIntake())
+                .stopAndAdd(new ParallelAction(armActions.deposit()))
+                .stopAndAdd(new ParallelAction(armActions.depositReset()))
                 // third sample
                 .strafeToLinearHeading(new Vector2d(60, 25), 0)
-                .strafeToLinearHeading(bucketPose.position, bucketPose.heading);
+                .stopAndAdd(armActions.runIntake(false))
+                .waitSeconds(2)
+                .strafeToLinearHeading(bucketPose.position, bucketPose.heading)
+                .stopAndAdd(armActions.reverseIntake())
+                .stopAndAdd(new ParallelAction(armActions.deposit()))
+                .stopAndAdd(new ParallelAction(armActions.depositReset()));
 
 
         while (!isStopRequested() && !opModeIsActive()) {
@@ -54,13 +75,13 @@ public class Net_Auto extends LinearOpMode {
 
         if (isStopRequested()) return;
 
-        Action trajectoryActionChosen;
+        Action bucket_action_1;
 
-        trajectoryActionChosen = tab1.build();
+        bucket_action_1 = bucket_traj_1.build();
 
         Actions.runBlocking(
                 new SequentialAction(
-                        trajectoryActionChosen
+                        bucket_action_1
                 )
         );
     }
